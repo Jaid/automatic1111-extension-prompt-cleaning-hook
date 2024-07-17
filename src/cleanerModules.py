@@ -12,8 +12,7 @@ cleanerModules = [{
   'description': 'Replace multiple line breaks with a single line break',
   'enabledByDefault': True,
   'process': sanitizeText.compressLines,
-},
-{
+}, {
   'id': 'trimAroundBreakKeyword',
   'title:': 'Trim Around Break Keyword',
   'description': 'Remove commans near “BREAK” keywords',

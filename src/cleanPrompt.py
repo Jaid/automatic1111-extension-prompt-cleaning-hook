@@ -6,10 +6,11 @@ from modules.processing import StableDiffusionProcessing
 from src.cleanerModules import cleanerModules
 from src.optionDefinitions import getOptionDefinitions
 
-extensionTitle = 'Prompt Cleaner Hook'
-extensionId = 'prompt_cleaner_hook'
+extensionTitle = 'Prompt Cleaning Hook'
+extensionId = 'prompt_cleaning_hook'
+
 logger = logging.getLogger(extensionTitle)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logger.info(f'Loading {extensionTitle}')
 
 def getOptionId(suffix: (str | None) = None) -> str:
@@ -51,8 +52,8 @@ class PromptCleaner(scripts.Script):
       return
 
     commaOnLinebreak = getattr(shared.opts, getOptionId('comma_on_linebreak'), True)
-    includeUncleaned = getattr(shared.opts, getOptionId('include_uncleaned'), True)
-    enableLogging = getattr(shared.opts, getOptionId('enable_logging'), False)
+    saveMetadata = getattr(shared.opts, getOptionId('save_metadata'), True)
+    logChanges = getattr(shared.opts, getOptionId('log_changes'), False)
 
     changedCount = 0
     originalPrompt = processing.prompt
@@ -62,7 +63,8 @@ class PromptCleaner(scripts.Script):
       cleanResult = process(processing.all_prompts[i], commaOnLinebreak)
       if cleanResult['changingModules'].count == 0:
         continue
-      logChange(cleanResult, processing.all_prompts[i])
+      if logChanges:
+        logChange(cleanResult, processing.all_prompts[i])
       changedCount += 1
       processing.all_prompts[i] = cleanResult['text']
 
@@ -70,15 +72,17 @@ class PromptCleaner(scripts.Script):
       cleanResult = process(processing.all_negative_prompts[i], commaOnLinebreak)
       if cleanResult['changingModules'].count == 0:
         continue
-      logChange(cleanResult, processing.all_negative_prompts[i], False)
+      if logChanges:
+        logChange(cleanResult, processing.all_negative_prompts[i], False)
       changedCount += 1
       processing.all_negative_prompts[i] = cleanResult['text']
 
     if changedCount == 0:
       return
 
-    logger.info(f'Cleaned {changedCount}/{len(processing.all_prompts) + len(processing.all_negative_prompts)} prompts')
-    if includeUncleaned:
+    if logChanges:
+      logger.info(f'Cleaned {changedCount}/{len(processing.all_prompts) + len(processing.all_negative_prompts)} prompts')
+    if saveMetadata:
       processing.extra_generation_params.setdefault(f'{extensionId}_original_prompt', originalPrompt)
       processing.extra_generation_params.setdefault(f'{extensionId}_original_negative_prompt', originalNegativePrompt)
 
