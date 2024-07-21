@@ -54,7 +54,9 @@ def getOption(optionId: str, defaultValue: Any = None) -> Any:
 def onUiSettings():
   section = (extensionId, extensionTitle)
   for optionId, defaultValue in defaults.items():
-    uiInfo: dict[str, Any] = {'default': defaultValue}
+    uiInfo: dict[str, Any] = {
+      'default': defaultValue
+    }
     if optionId in uiInfos:
       uiInfo.update(uiInfos[optionId])
     optionInfo = shared.OptionInfo(**uiInfo)
