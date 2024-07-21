@@ -26,7 +26,7 @@ def logChange(result, original: str, isPositive: bool = True):
   promptName = 'prompt' if isPositive else 'negative prompt'
   modulesString = ' → '.join(result['changingModules'])
   logMessage = f'Cleaned {promptName} from “{originalPromptSingleLine}” to “{cleanedSingleLine}” using modules {modulesString}'
-  logChanges = getOption('log_changes', False)
+  logChanges = getOption('log_changes')
   if logChanges:
     logger.info(logMessage)
   else:
@@ -44,11 +44,11 @@ class PromptCleaningHook(scripts.Script):
     return scripts.AlwaysVisible
 
   def process(self, processing: StableDiffusionProcessing):
-    if getOption('enabled', False) == False:
+    if not getOption('enabled'):
       return
 
-    commaOnLinebreak = getOption('comma_on_linebreak', True)
-    saveMetadata = getOption('save_metadata', True)
+    commaOnLinebreak = getOption('comma_on_linebreak')
+    saveMetadata = getOption('save_metadata')
 
     changedCount = 0
     originalPrompt = processing.prompt
