@@ -1,7 +1,7 @@
 from typing import Any
 from modules import shared
-from prompt_cleaning_hook.cleanerModules import cleanerModules
-from prompt_cleaning_hook.extension import extensionId, extensionTitle
+from src.prompt_cleaning_hook.cleanerModules import cleanerModules
+from src.prompt_cleaning_hook.extension import extensionId, extensionTitle
 
 def getOptionDefinitions():
   optionDefinitions = {
