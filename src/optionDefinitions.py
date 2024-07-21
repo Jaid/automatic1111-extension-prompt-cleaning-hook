@@ -9,8 +9,19 @@ def getOptionDefinitions():
     'log_changes': shared.OptionInfo(False, 'Print a log line to console for every changed prompt'),
   }
   for cleanerModule in cleanerModules:
+    if 'isConfigurable' in cleanerModule and not cleanerModule['isConfigurable']:
+      continue
     moduleId = cleanerModule['id']
-    optionInfo = shared.OptionInfo(cleanerModule['enabledByDefault'])
-    optionInfo.label = cleanerModule['title']
-    optionInfo.comment_after = cleanerModule['description']
+    optionInfo = shared.OptionInfo()
+    if 'enabledByDefault' in cleanerModule:
+      optionInfo.default = cleanerModule['enabledByDefault']
+    if 'title' in cleanerModule:
+      optionInfo.label = cleanerModule['title']
+    else:
+      optionInfo.label = cleanerModule['id']
+    if 'description' in cleanerModule:
+      description = cleanerModule['description']
+      optionInfo.info(description)
+      optionInfo.infotext = description
     optionDefinitions[f'cleaner_module_{moduleId}'] = optionInfo
+  return optionDefinitions

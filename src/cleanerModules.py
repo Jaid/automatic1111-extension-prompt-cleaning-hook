@@ -4,6 +4,7 @@ cleanerModules = [{
   'id': 'normalizeLineEndings',
   'title:': 'Normalize Line Endings',
   'description': 'Replace all line endings with \\n',
+  'isConfigurable': False,
   'enabledByDefault': True,
   'process': sanitizeText.normalizeLineEndings
 }, {
@@ -15,7 +16,7 @@ cleanerModules = [{
 }, {
   'id': 'trimAroundBreakKeyword',
   'title:': 'Trim Around Break Keyword',
-  'description': 'Remove commans near “BREAK” keywords',
+  'description': 'Remove commas near “BREAK” keywords (potentially changes generated outputs)',
   'enabledByDefault': True,
   'process': sanitizeText.trimAroundBreakKeyword
 }, {
@@ -27,13 +28,13 @@ cleanerModules = [{
 }, {
   'id': 'normalizeUnicode',
   'title:': 'Normalize Unicode',
-  'description': 'Normalize unicode characters',
+  'description': 'Normalize unicode characters (potentially changes generated outputs)',
   'enabledByDefault': True,
   'process': sanitizeText.normalizeUnicode
 }, {
   'id': 'clearUnprintable',
   'title:': 'Clear Unprintable',
-  'description': 'Remove unprintable characters',
+  'description': 'Remove unprintable characters (potentially changes generated outputs)',
   'enabledByDefault': True,
   'process': sanitizeText.clearUnprintable
 }, {
@@ -57,7 +58,7 @@ cleanerModules = [{
 }, {
   'id': 'compressCommas',
   'title:': 'Compress Commas',
-  'description': 'Replace multiple commas with a single comma',
+  'description': 'Replace multiple commas with a single comma (potentially changes generated outputs)',
   'enabledByDefault': True,
   'process': sanitizeText.compressCommas
 }, {
@@ -69,7 +70,7 @@ cleanerModules = [{
 }, {
   'id': 'trimEdgeCommas',
   'title:': 'Trim Edge Commas',
-  'description': 'Remove leading and trailing commas',
+  'description': 'Remove leading and trailing commas (potentially changes generated outputs)',
   'enabledByDefault': True,
   'process': sanitizeText.trimEdgeCommas
 }]

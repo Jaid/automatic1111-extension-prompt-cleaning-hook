@@ -1,17 +1,13 @@
 import logging
+import os
 
-from modules import scripts, shared
+from modules import scripts, shared, script_callbacks
 from modules.processing import StableDiffusionProcessing
 
 from src.cleanerModules import cleanerModules
 from src.optionDefinitions import getOptionDefinitions
-
-extensionTitle = 'Prompt Cleaning Hook'
-extensionId = 'prompt_cleaning_hook'
-
-logger = logging.getLogger(extensionTitle)
-logger.setLevel(logging.INFO)
-logger.info(f'Loading {extensionTitle}')
+from src.extension import extensionId, extensionTitle
+from lib.logger import logger
 
 def getOptionId(suffix: (str | None) = None) -> str:
   prefix = extensionId
@@ -35,7 +31,7 @@ def logChange(result, original: str, isPositive: bool = True):
   promptName = 'prompt' if isPositive else 'negative prompt'
   modulesString = '/'.join(result['changingModules'])
   logMessage = f'Cleaned {promptName} from “{originalPromptSingleLine}” to “{cleanedSingleLine}” using modules {modulesString}'
-  logger.debug(logMessage)
+  logger.info(logMessage)
 
 class PromptCleaner(scripts.Script):
   def title(self):
@@ -86,11 +82,12 @@ class PromptCleaner(scripts.Script):
       processing.extra_generation_params.setdefault(f'{extensionId}_original_prompt', originalPrompt)
       processing.extra_generation_params.setdefault(f'{extensionId}_original_negative_prompt', originalNegativePrompt)
 
-  def onUiSettings(self):
-    logger.debug('onUiSettings')
-    section = (extensionId, extensionTitle)
-    optionDefinitions = getOptionDefinitions()
-    for optionId, optionInfo in optionDefinitions.items():
-      optionInfo.section = section
-      fullOptionId = getOptionId(optionId)
-      shared.opts.add_option(fullOptionId, optionInfo)
+def onUiSettings():
+  section = (extensionId, extensionTitle)
+  optionDefinitions = getOptionDefinitions()
+  for optionId, optionInfo in optionDefinitions.items():
+    optionInfo.section = section
+    fullOptionId = getOptionId(optionId)
+    shared.opts.add_option(fullOptionId, optionInfo)
+
+script_callbacks.on_ui_settings(onUiSettings)
