@@ -24,11 +24,19 @@ def logChange(result, original: str, isPositive: bool = True):
   originalPromptSingleLine = original.replace('\n', '¶')
   cleanedSingleLine = cleaned.replace('\n', '¶')
   promptName = 'prompt' if isPositive else 'negative prompt'
-  modulesString = '/'.join(result['changingModules'])
+  modulesString = ' → '.join(result['changingModules'])
   logMessage = f'Cleaned {promptName} from “{originalPromptSingleLine}” to “{cleanedSingleLine}” using modules {modulesString}'
-  logger.info(logMessage)
+  logChanges = getOption('log_changes', False)
+  if logChanges:
+    logger.info(logMessage)
+  else:
+    logger.debug(logMessage)
 
-class PromptCleaner(scripts.Script):
+class PromptCleaningHook(scripts.Script):
+  def __init__(self):
+    logger.debug('PromptCleaningHook initialized')
+    super().__init__()
+
   def title(self):
     return extensionTitle
 
@@ -41,7 +49,6 @@ class PromptCleaner(scripts.Script):
 
     commaOnLinebreak = getOption('comma_on_linebreak', True)
     saveMetadata = getOption('save_metadata', True)
-    logChanges = getOption('log_changes', False)
 
     changedCount = 0
     originalPrompt = processing.prompt
@@ -51,8 +58,7 @@ class PromptCleaner(scripts.Script):
       cleanResult = process(processing.all_prompts[i], commaOnLinebreak)
       if cleanResult['changingModules'].count == 0:
         continue
-      if logChanges:
-        logChange(cleanResult, processing.all_prompts[i])
+      logChange(cleanResult, processing.all_prompts[i])
       changedCount += 1
       processing.all_prompts[i] = cleanResult['text']
 
@@ -60,16 +66,14 @@ class PromptCleaner(scripts.Script):
       cleanResult = process(processing.all_negative_prompts[i], commaOnLinebreak)
       if cleanResult['changingModules'].count == 0:
         continue
-      if logChanges:
-        logChange(cleanResult, processing.all_negative_prompts[i], False)
+      logChange(cleanResult, processing.all_negative_prompts[i], False)
       changedCount += 1
       processing.all_negative_prompts[i] = cleanResult['text']
 
     if changedCount == 0:
       return
 
-    if logChanges:
-      logger.info(f'Cleaned {changedCount}/{len(processing.all_prompts) + len(processing.all_negative_prompts)} prompts')
+    logger.debug(f'Cleaned {changedCount}/{len(processing.all_prompts) + len(processing.all_negative_prompts)} prompts')
     if saveMetadata:
       processing.extra_generation_params.setdefault(f'{extensionId}_original_prompt', originalPrompt)
       processing.extra_generation_params.setdefault(f'{extensionId}_original_negative_prompt', originalNegativePrompt)

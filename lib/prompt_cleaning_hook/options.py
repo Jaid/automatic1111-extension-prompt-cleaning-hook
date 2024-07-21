@@ -35,9 +35,9 @@ def getOptionId(suffix: (str | None) = None) -> str:
   return prefix
 
 def getOption(optionId: str, defaultValue: Any) -> (Any):
-  if not hasattr(shared.opts, optionId):
-    return defaultValue
   fullOptionId = getOptionId(optionId)
+  if not hasattr(shared.opts, fullOptionId):
+    return defaultValue
   value = getattr(shared.opts, fullOptionId, defaultValue)
   return value
 
