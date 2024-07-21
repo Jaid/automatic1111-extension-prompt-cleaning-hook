@@ -5,7 +5,7 @@ import sys
 
 from modules import shared
 
-from src.extension import extensionId, extensionTitle
+from prompt_cleaning_hook.extension import extensionId, extensionTitle
 
 COLORS = {
   'DEBUG': '\033[0;36m', # CYAN

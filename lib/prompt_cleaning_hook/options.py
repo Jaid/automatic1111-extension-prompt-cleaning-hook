@@ -1,5 +1,7 @@
+from typing import Any
 from modules import shared
-from src.cleanerModules import cleanerModules
+from prompt_cleaning_hook.cleanerModules import cleanerModules
+from prompt_cleaning_hook.extension import extensionId, extensionTitle
 
 def getOptionDefinitions():
   optionDefinitions = {
@@ -25,3 +27,24 @@ def getOptionDefinitions():
       optionInfo.infotext = description
     optionDefinitions[f'cleaner_module_{moduleId}'] = optionInfo
   return optionDefinitions
+
+def getOptionId(suffix: (str | None) = None) -> str:
+  prefix = extensionId
+  if suffix is not None:
+    return f'{prefix}_{suffix}'
+  return prefix
+
+def getOption(optionId: str, defaultValue: Any) -> (Any):
+  if not hasattr(shared.opts, optionId):
+    return defaultValue
+  fullOptionId = getOptionId(optionId)
+  value = getattr(shared.opts, fullOptionId, defaultValue)
+  return value
+
+def onUiSettings():
+  section = (extensionId, extensionTitle)
+  optionDefinitions = getOptionDefinitions()
+  for optionId, optionInfo in optionDefinitions.items():
+    optionInfo.section = section
+    fullOptionId = getOptionId(optionId)
+    shared.opts.add_option(fullOptionId, optionInfo)

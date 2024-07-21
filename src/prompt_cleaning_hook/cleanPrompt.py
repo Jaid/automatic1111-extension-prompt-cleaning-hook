@@ -1,19 +1,10 @@
-import logging
-import os
-
-from modules import scripts, shared, script_callbacks
+from modules import scripts
 from modules.processing import StableDiffusionProcessing
 
-from src.cleanerModules import cleanerModules
-from src.optionDefinitions import getOptionDefinitions
-from src.extension import extensionId, extensionTitle
+from prompt_cleaning_hook.cleanerModules import cleanerModules
+from lib.options import getOption
+from prompt_cleaning_hook.extension import extensionId, extensionTitle
 from lib.logger import logger
-
-def getOptionId(suffix: (str | None) = None) -> str:
-  prefix = extensionId
-  if suffix is not None:
-    return f'{prefix}_{suffix}'
-  return prefix
 
 def process(text: str, commaOnLinebreak: bool) -> dict[str, str | list[str]]:
   changingModules: list[str] = []
@@ -35,21 +26,18 @@ def logChange(result, original: str, isPositive: bool = True):
 
 class PromptCleaner(scripts.Script):
   def title(self):
-    logger.debug('title')
     return extensionTitle
 
   def show(self, isImg2img):
-    logger.debug('show')
     return scripts.AlwaysVisible
 
   def process(self, processing: StableDiffusionProcessing):
-    logger.debug('process')
-    if not hasattr(shared.opts, getOptionId('enabled') or not shared.opts[getOptionId('enabled')]): # type: ignore
+    if getOption('enabled', False) == False:
       return
 
-    commaOnLinebreak = getattr(shared.opts, getOptionId('comma_on_linebreak'), True)
-    saveMetadata = getattr(shared.opts, getOptionId('save_metadata'), True)
-    logChanges = getattr(shared.opts, getOptionId('log_changes'), False)
+    commaOnLinebreak = getOption('comma_on_linebreak', True)
+    saveMetadata = getOption('save_metadata', True)
+    logChanges = getOption('log_changes', False)
 
     changedCount = 0
     originalPrompt = processing.prompt
@@ -81,13 +69,3 @@ class PromptCleaner(scripts.Script):
     if saveMetadata:
       processing.extra_generation_params.setdefault(f'{extensionId}_original_prompt', originalPrompt)
       processing.extra_generation_params.setdefault(f'{extensionId}_original_negative_prompt', originalNegativePrompt)
-
-def onUiSettings():
-  section = (extensionId, extensionTitle)
-  optionDefinitions = getOptionDefinitions()
-  for optionId, optionInfo in optionDefinitions.items():
-    optionInfo.section = section
-    fullOptionId = getOptionId(optionId)
-    shared.opts.add_option(fullOptionId, optionInfo)
-
-script_callbacks.on_ui_settings(onUiSettings)
