@@ -1,4 +1,4 @@
-from lib import sanitizeText
+from lib.prompt_cleaning_hook import sanitizeText
 
 cleanerModules = [{
   'id': 'normalizeLineEndings',
