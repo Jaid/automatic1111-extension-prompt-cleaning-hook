@@ -10,7 +10,8 @@ from lib.prompt_cleaning_hook.options import getOption
 from src.prompt_cleaning_hook.extension import extensionId, extensionTitle
 from lib.prompt_cleaning_hook.logger import logger
 
-def process(text: str, commaOnLinebreak: bool) -> dict[str, str | list[str]]:
+
+def processPrompt(text: str, commaOnLinebreak: bool) -> dict[str, str | list[str]]:
   changingModules: list[str] = []
   for module in cleanerModules:
     newText = module['process'](text)
@@ -46,29 +47,25 @@ class PromptCleaningHook(scripts.Script):
   def process(self, processing: StableDiffusionProcessing):
     if not getOption('enabled'):
       return
-
     commaOnLinebreak = getOption('comma_on_linebreak')
     saveMetadata = getOption('save_metadata')
-
     changedCount = 0
     originalPrompt = processing.prompt
     originalNegativePrompt = processing.negative_prompt
 
-    for i in range(len(processing.all_prompts)):
-      cleanResult = process(processing.all_prompts[i], commaOnLinebreak)
-      if cleanResult['changingModules'].count == 0:
-        continue
-      logChange(cleanResult, processing.all_prompts[i])
-      changedCount += 1
-      processing.all_prompts[i] = cleanResult['text']
+    def cleanPromptList(prompts, isPositive=True):
+      innerChangedCount = 0
+      for i in range(len(prompts)):
+        cleanResult = processPrompt(prompts[i], commaOnLinebreak)
+        if len(cleanResult['changingModules']) == 0:
+          continue
+        innerChangedCount += 1
+        logChange(cleanResult, prompts[i], isPositive)
+        prompts[i] = cleanResult['text']
+      return innerChangedCount
 
-    for i in range(len(processing.all_negative_prompts)):
-      cleanResult = process(processing.all_negative_prompts[i], commaOnLinebreak)
-      if cleanResult['changingModules'].count == 0:
-        continue
-      logChange(cleanResult, processing.all_negative_prompts[i], False)
-      changedCount += 1
-      processing.all_negative_prompts[i] = cleanResult['text']
+    changedCount += cleanPromptList(processing.all_prompts)
+    changedCount += cleanPromptList(processing.all_negative_prompts, isPositive=False)
 
     if changedCount == 0:
       return

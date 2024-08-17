@@ -1,6 +1,8 @@
 import re
 import unicodedata
 
+from lib.prompt_cleaning_hook.loras import formatLoras, removeLoras
+
 def isCharacterPrintable(c: str) -> bool:
   if ord(c) == 0x200B: # Zero-width space
     return False
@@ -92,3 +94,21 @@ def trimAroundBreakKeyword(text: str, keyword: str = 'BREAK') -> str:
   pagesCleaned = map(trimEdgeCommas, pages)
   text = f' {keyword} '.join(pagesCleaned)
   return text
+
+def stripEndingWhitespace(text: str) -> str:
+  text = re.sub(r'\s+$', '', text)
+  return text
+
+def stripStartingWhitespace(text: str) -> str:
+  text = re.sub(r'^\s+', '', text)
+  return text
+
+def moveLoras(text: str) -> str:
+  loralessText, loras = removeLoras(text)
+  if len(loras) == 0:
+    return text
+  loralessText = trimRightCommas(loralessText)
+  loralessText = stripEndingWhitespace(loralessText)
+  loras = sorted(loras, key=lambda lora: lora['name'])
+  lorasText = formatLoras(loras)
+  return f'{loralessText} {lorasText}'

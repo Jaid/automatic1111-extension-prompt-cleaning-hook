@@ -1,6 +1,14 @@
 from lib.prompt_cleaning_hook import sanitizeText
 
-cleanerModules = [{
+cleanerModules = [
+  {
+    'id': 'moveLoras',
+    'title': 'Move Loras',
+    'description': 'Move Loras to the end of the prompt',
+    'isConfigurable': False,
+    'enabledByDefault': True,
+    'process': sanitizeText.moveLoras
+  },{
   'id': 'normalizeLineEndings',
   'title:': 'Normalize Line Endings',
   'description': 'Replace all line endings with \\n',
